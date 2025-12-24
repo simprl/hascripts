@@ -1,0 +1,16 @@
+{
+  "name": "ops-ui-sse",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w @ops/server\" \"npm run dev -w @ops/web\"",
+    "build": "npm run build -w @ops/server && npm run build -w @ops/web",
+    "lint": "npm run lint -w @ops/server && npm run lint -w @ops/web",
+    "typecheck": "npm run typecheck -w @ops/server && npm run typecheck -w @ops/web"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
