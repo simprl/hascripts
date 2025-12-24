@@ -1,5 +1,5 @@
 {
-  "name": "ops-ui-sse",
+  "name": "hascripts",
   "private": true,
   "workspaces": [
     "packages/*"

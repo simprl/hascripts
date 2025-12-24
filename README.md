@@ -1,4 +1,4 @@
-# ops-ui-sse
+# hascripts
 
 Web UI to run local shell scripts and stream console output via SSE.
 
