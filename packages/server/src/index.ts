@@ -26,11 +26,15 @@ app.get("/actions", async (_request, reply) => {
 app.get("/run", async (request, reply) => {
   const query = request.query as { cmd?: string | string[] };
   const cmds = normalizeCmds(query.cmd);
+  const origin = request.headers.origin;
+  const allowOrigin = typeof origin === "string" ? origin : "*";
 
   reply.raw.writeHead(200, {
     "Content-Type": "text/event-stream",
     "Cache-Control": "no-cache",
     Connection: "keep-alive",
+    "Access-Control-Allow-Origin": allowOrigin,
+    Vary: "Origin",
     "X-Accel-Buffering": "no"
   });
   reply.raw.flushHeaders();
