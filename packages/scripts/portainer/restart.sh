@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+echo "Portainer restart starting"
+
+if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
+  echo "Please run as root (use sudo)."
+  exit 1
+fi
+
+CONTAINER_NAME="portainer"
+
+if ! command -v docker >/dev/null 2>&1; then
+  echo "docker CLI not found. Is Docker installed?"
+  exit 1
+fi
+
+if ! docker ps -a --format '{{.Names}}' | grep -qx "$CONTAINER_NAME"; then
+  echo "Container '$CONTAINER_NAME' not found."
+  exit 1
+fi
+
+echo "Restarting container: $CONTAINER_NAME"
+docker restart "$CONTAINER_NAME" >/dev/null
+
+echo "Done. Current status:"
+docker ps --filter "name=^/${CONTAINER_NAME}$" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
