@@ -137,7 +137,8 @@ app.get("/run", async (request, reply) => {
   const allowOrigin = typeof origin === "string" ? origin : "*";
 
   // One active run at a time (simplifies state and cancel/resize)
-  if (currentRun) {
+  const activeRun = currentRun;
+  if (activeRun) {
     reply.raw.writeHead(409, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
