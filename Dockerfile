@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-alpine AS build
+FROM node:20-bookworm-slim AS build
 
 WORKDIR /app
 
@@ -8,13 +8,17 @@ COPY package.json package-lock.json ./
 COPY packages/server/package.json packages/server/package.json
 COPY packages/web/package.json packages/web/package.json
 
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ \
+  && rm -rf /var/lib/apt/lists/*
+
 RUN npm ci
 
 COPY . .
 RUN npm run build
 RUN npm prune --omit=dev
 
-FROM node:20-alpine AS runtime
+FROM node:20-bookworm-slim AS runtime
 
 WORKDIR /app
 ENV NODE_ENV=production
