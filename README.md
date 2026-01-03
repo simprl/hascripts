@@ -19,6 +19,13 @@ npm run dev
 - API base defaults to `/api`; set `VITE_API_BASE` to override.
 - To change the proxy target, set `WEB_DEV_SERVER_URL` (default: `http://localhost:8323`).
 
+## Dev (Docker)
+```
+docker compose -f docker-compose.dev.yml up --build
+```
+- Backend+proxy: http://localhost:8322
+- Vite dev server: http://localhost:8323
+
 ## Dev (root backend for Docker scripts)
 Use this when you need Docker install/uninstall to run without sudo prompts.
 ```

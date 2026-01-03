@@ -7,6 +7,8 @@
   ],
   "scripts": {
     "dev": "concurrently -n server,web -c blue,green \"npm run dev -w @hascripts/server\" \"npm run dev -w @hascripts/web\"",
+    "dev:docker": "docker compose -f docker-compose.dev.yml up --build",
+    "dev:docker:down": "docker compose -f docker-compose.dev.yml down",
     "build": "npm run build -w @hascripts/server && npm run build -w @hascripts/web",
     "lint": "npm run lint -w @hascripts/server && npm run lint -w @hascripts/web",
     "typecheck": "npm run typecheck -w @hascripts/server && npm run typecheck -w @hascripts/web"

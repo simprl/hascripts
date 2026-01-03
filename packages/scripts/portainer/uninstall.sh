@@ -4,7 +4,7 @@ set -euo pipefail
 # ============================
 # Set to 1 to REMOVE Portainer data (volume portainer_data)
 # ============================
-WIPE_DATA=0
+WIPE_DATA=1
 
 echo "Portainer uninstall starting"
 
