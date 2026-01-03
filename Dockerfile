@@ -9,7 +9,13 @@ COPY packages/server/package.json packages/server/package.json
 COPY packages/web/package.json packages/web/package.json
 
 RUN apt-get update \
-  && apt-get install -y --no-install-recommends python3 make g++ \
+  && apt-get install -y --no-install-recommends ca-certificates curl gnupg \
+  && install -m 0755 -d /etc/apt/keyrings \
+  && curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc \
+  && chmod a+r /etc/apt/keyrings/docker.asc \
+  && echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian bookworm stable" > /etc/apt/sources.list.d/docker.list \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends python3 make g++ docker-ce-cli \
   && rm -rf /var/lib/apt/lists/*
 
 RUN npm ci
@@ -29,6 +35,6 @@ COPY --from=build /app/packages/server/dist /app/packages/server/dist
 COPY --from=build /app/packages/web/dist /app/packages/web/dist
 COPY --from=build /app/packages/scripts /app/packages/scripts
 
-EXPOSE 8080
+EXPOSE 8321
 
 CMD ["node", "packages/server/dist/index.js"]

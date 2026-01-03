@@ -2,7 +2,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8080";
+const API_BASE = (import.meta.env.VITE_API_BASE ?? "/api").replace(/\/+$/, "");
+
+const apiUrl = (path: string) => {
+  if (path.startsWith("/")) return `${API_BASE}${path}`;
+  return `${API_BASE}/${path}`;
+};
 
 type ActionMap = Record<string, { name: string; path: string }[]>;
 
@@ -96,7 +101,7 @@ export default function App() {
   useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`${API_BASE}/actions`, { signal: controller.signal })
+    fetch(apiUrl("/actions"), { signal: controller.signal })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error("Bad response"))))
       .then((data) => {
         if (data && typeof data === "object") {
@@ -120,7 +125,7 @@ export default function App() {
 
     const params = new URLSearchParams();
     cmds.forEach((cmd) => params.append("cmd", cmd));
-    const url = `${API_BASE}/run?${params.toString()}`;
+    const url = `${apiUrl("/run")}?${params.toString()}`;
 
     term.reset();
     term.writeln(`Starting: ${label}`);
@@ -164,7 +169,7 @@ export default function App() {
 
       const t = terminalRef.current;
       if (t) {
-        void fetch(`${API_BASE}/resize`, {
+        void fetch(apiUrl("/resize"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ runId, cols: t.cols, rows: t.rows })
@@ -198,7 +203,7 @@ export default function App() {
     const runId = runIdRef.current;
 
     if (runId) {
-      await fetch(`${API_BASE}/cancel`, {
+      await fetch(apiUrl("/cancel"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ runId })

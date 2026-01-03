@@ -15,8 +15,16 @@ npm install
 ```
 npm run dev
 ```
-- Server: http://localhost:8080
-- Web: http://localhost:5173
+- App: http://localhost:8322 (backend proxies to the Vite dev server)
+- API base defaults to `/api`; set `VITE_API_BASE` to override.
+- To change the proxy target, set `WEB_DEV_SERVER_URL` (default: `http://localhost:8323`).
+
+## Dev (Docker)
+```
+docker compose -f docker-compose.dev.yml up --build
+```
+- Backend+proxy: http://localhost:8322
+- Vite dev server: http://localhost:8323
 
 ## Dev (root backend for Docker scripts)
 Use this when you need Docker install/uninstall to run without sudo prompts.
@@ -24,7 +32,7 @@ Use this when you need Docker install/uninstall to run without sudo prompts.
 sudo -E npm run dev -w @hascripts/server
 npm run dev -w @hascripts/web
 ```
-- Web uses `http://localhost:8080` via `VITE_API_BASE` by default.
+- App: http://localhost:8322
 
 ## Run a group of scripts
 Click **Run group** in the UI to run multiple scripts sequentially.
@@ -33,7 +41,7 @@ Click **Run group** in the UI to run multiple scripts sequentially.
 - Run the dev servers: `npm run dev`
 - Open the web UI: http://localhost:5173
 - Use the new **docker** group to run `install` or `uninstall`.
-- Optional API check: `curl -N "http://localhost:8080/run?cmd=docker/install.sh"`
+- Optional API check: `curl -N "http://localhost:8321/api/run?cmd=docker/install.sh"`
 - If you run the server as a non-root user, configure sudo (see below) so the Docker scripts can run.
 
 ## Production install (Debian)
@@ -42,7 +50,7 @@ This installs the service to `/opt/hascripts` and serves the built frontend from
 curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | REPO=<owner>/<repo> bash
 ```
 - Service: `hascripts` (systemd)
-- App URL: http://localhost:8080
+- App URL: http://localhost:8321
 - Logs: `journalctl -u hascripts -f`
 
 ## Production uninstall (Debian)

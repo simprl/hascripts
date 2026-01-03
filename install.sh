@@ -67,4 +67,4 @@ EOF
 systemctl daemon-reload
 systemctl enable --now "${SERVICE_NAME}"
 
-echo "Install complete. Service is running on http://localhost:8080"
+echo "Install complete. Service is running on http://localhost:8321"
