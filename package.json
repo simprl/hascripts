@@ -1,17 +1,17 @@
 {
-  "name": "hascripts",
+  "name": "lazystrap",
   "version": "0.1.10",
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w @hascripts/server\" \"npm run dev -w @hascripts/web\"",
+    "dev": "concurrently -n server,web -c blue,green \"npm run dev -w @lazystrap/server\" \"npm run dev -w @lazystrap/web\"",
     "dev:docker": "docker compose -f docker-compose.dev.yml up --build",
     "dev:docker:down": "docker compose -f docker-compose.dev.yml down",
-    "build": "npm run build -w @hascripts/server && npm run build -w @hascripts/web",
-    "lint": "npm run lint -w @hascripts/server && npm run lint -w @hascripts/web",
-    "typecheck": "npm run typecheck -w @hascripts/server && npm run typecheck -w @hascripts/web"
+    "build": "npm run build -w @lazystrap/server && npm run build -w @lazystrap/web",
+    "lint": "npm run lint -w @lazystrap/server && npm run lint -w @lazystrap/web",
+    "typecheck": "npm run typecheck -w @lazystrap/server && npm run typecheck -w @lazystrap/web"
   },
   "devDependencies": {
     "concurrently": "^9.0.0"

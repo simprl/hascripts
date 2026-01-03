@@ -227,7 +227,7 @@ export default function App() {
     <div className="min-h-screen px-4 py-6 md:px-8">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Ops UI</p>
+          <p className="text-sm uppercase tracking-[0.2em] text-slate-400">Lazystrap</p>
           <h1 className="text-2xl font-semibold text-white">Script Runner</h1>
         </div>
         <div className="text-right text-sm text-slate-300">
