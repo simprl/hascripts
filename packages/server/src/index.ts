@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import proxy from "@fastify/http-proxy";
 import fastifyStatic from "@fastify/static";
 import { existsSync, promises as fs } from "node:fs";
 import path from "node:path";
@@ -73,28 +74,37 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..", "..", "..");
 const scriptsRoot = path.join(repoRoot, "packages", "scripts");
 const webDistRoot = path.join(repoRoot, "packages", "web", "dist");
+const webDevServerUrl = process.env.WEB_DEV_SERVER_URL || "http://localhost:8323";
+const useDevProxy = process.env.NODE_ENV === "development";
 
 const app = Fastify({ logger: true });
 
 await app.register(cors, { origin: true });
 
-if (existsSync(webDistRoot)) {
+if (useDevProxy) {
+  await app.register(proxy, {
+    upstream: webDevServerUrl,
+    httpMethods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE"],
+    websocket: true,
+    http2: false
+  });
+} else if (existsSync(webDistRoot)) {
   await app.register(fastifyStatic, { root: webDistRoot });
   app.setNotFoundHandler((_request, reply) => {
     reply.sendFile("index.html");
   });
 }
 
-app.get("/health", async (_request, reply) => {
+app.get("/api/health", async (_request, reply) => {
   reply.type("text/plain").send("ok");
 });
 
-app.get("/actions", async (_request, reply) => {
+app.get("/api/actions", async (_request, reply) => {
   const actions = await listActions();
   reply.send(actions);
 });
 
-app.post("/cancel", async (request, reply) => {
+app.post("/api/cancel", async (request, reply) => {
   const body = (request.body ?? {}) as { runId?: string };
   const runId = body.runId;
 
@@ -106,7 +116,7 @@ app.post("/cancel", async (request, reply) => {
   return reply.send({ ok: true });
 });
 
-app.post("/resize", async (request, reply) => {
+app.post("/api/resize", async (request, reply) => {
   const body = (request.body ?? {}) as { runId?: string; cols?: number; rows?: number };
   const { runId, cols, rows } = body;
 
@@ -129,7 +139,7 @@ app.post("/resize", async (request, reply) => {
   }
 });
 
-app.get("/run", async (request, reply) => {
+app.get("/api/run", async (request, reply) => {
   const query = request.query as { cmd?: string | string[] };
   const cmds = normalizeCmds(query.cmd);
 
@@ -375,7 +385,10 @@ const isSudoScript = (scriptPath: string) => {
   return scriptPath.startsWith(dockerRoot);
 };
 
-app.listen({ host: "0.0.0.0", port: 8080 }).catch((error) => {
+const port = Number.parseInt(process.env.PORT || "", 10);
+const listenPort = Number.isFinite(port) && port > 0 ? port : 8321;
+
+app.listen({ host: "0.0.0.0", port: listenPort }).catch((error) => {
   app.log.error(error);
   process.exit(1);
 });

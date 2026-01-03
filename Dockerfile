@@ -29,6 +29,6 @@ COPY --from=build /app/packages/server/dist /app/packages/server/dist
 COPY --from=build /app/packages/web/dist /app/packages/web/dist
 COPY --from=build /app/packages/scripts /app/packages/scripts
 
-EXPOSE 8080
+EXPOSE 8321
 
 CMD ["node", "packages/server/dist/index.js"]
