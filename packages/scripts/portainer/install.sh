@@ -20,7 +20,7 @@ if ! docker info >/dev/null 2>&1; then
   exit 1
 fi
 
-CONTAINER_NAME="portainer"
+CONTAINER_NAME="${TARGET_CONTAINER:-portainer}"
 VOLUME_NAME="portainer_data"
 IMAGE="portainer/portainer-ce:latest"
 
