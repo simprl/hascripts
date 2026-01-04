@@ -7,8 +7,20 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import crypto from "node:crypto";
 import * as pty from "node-pty";
+import { execFile } from "node:child_process";
 
 type ActionMap = Record<string, { name: string; path: string }[]>;
+type ContainerInfo = {
+  id: string;
+  name: string;
+  image: string;
+  status: string;
+  running: boolean;
+};
+type ServiceStatusMap = Record<
+  string,
+  { installed: boolean; running: boolean; ambiguous: boolean; containers: ContainerInfo[] }
+>;
 
 type RunState = {
   runId: string;
@@ -104,6 +116,11 @@ app.get("/api/actions", async (_request, reply) => {
   reply.send(actions);
 });
 
+app.get("/api/services", async (_request, reply) => {
+  const statuses = await listServiceStatuses();
+  reply.send(statuses);
+});
+
 app.post("/api/cancel", async (request, reply) => {
   const body = (request.body ?? {}) as { runId?: string };
   const runId = body.runId;
@@ -140,8 +157,9 @@ app.post("/api/resize", async (request, reply) => {
 });
 
 app.get("/api/run", async (request, reply) => {
-  const query = request.query as { cmd?: string | string[] };
+  const query = request.query as { cmd?: string | string[]; container?: string };
   const cmds = normalizeCmds(query.cmd);
+  const targetContainer = typeof query.container === "string" ? query.container : undefined;
 
   const origin = request.headers.origin;
   const allowOrigin = typeof origin === "string" ? origin : "*";
@@ -230,7 +248,7 @@ app.get("/api/run", async (request, reply) => {
 
       sendEvent("step_start", { message: `Running ${path.relative(scriptsRoot, scriptPath)}` });
 
-      const result = await runScriptPty(scriptPath, sendEvent, (p, runId) => {
+      const result = await runScriptPty(scriptPath, sendEvent, targetContainer, (p, runId) => {
         currentRun = {
           runId,
           ownerId,
@@ -313,6 +331,7 @@ const resolveScript = (cmd: string) => {
 const runScriptPty = (
   scriptPath: string,
   sendEvent: (event: string, data: unknown) => void,
+  targetContainer: string | undefined,
   onStart: (p: pty.IPty, runId: string) => void
 ) => {
   return new Promise<{ code: number | null; runId: string }>((resolve) => {
@@ -325,17 +344,23 @@ const runScriptPty = (
 
     const runId = crypto.randomUUID();
 
+    const env: NodeJS.ProcessEnv = {
+      ...process.env,
+      TERM: "xterm-256color",
+      LANG: process.env.LANG ?? "C.UTF-8",
+      LC_ALL: process.env.LC_ALL ?? "C.UTF-8"
+    };
+
+    if (targetContainer) {
+      env.TARGET_CONTAINER = targetContainer;
+    }
+
     const p = pty.spawn(command, args, {
       cwd: path.dirname(scriptPath),
       name: "xterm-256color",
       cols: 120,
       rows: 30,
-      env: {
-        ...process.env,
-        TERM: "xterm-256color",
-        LANG: process.env.LANG ?? "C.UTF-8",
-        LC_ALL: process.env.LC_ALL ?? "C.UTF-8"
-      }
+      env
     });
 
     onStart(p, runId);
@@ -378,6 +403,81 @@ const listActions = async (): Promise<ActionMap> => {
   }
 
   return result;
+};
+
+const listServiceStatuses = async () => {
+  const actions = await listActions();
+  const serviceKeys = Object.keys(actions);
+
+  const docker = await listDockerContainers();
+  const statuses: ServiceStatusMap = {};
+
+  for (const service of serviceKeys) {
+    const serviceToken = normalizeToken(service);
+    const matches = docker.containers.filter((item) =>
+      normalizeToken(item.image).includes(serviceToken)
+    );
+
+    statuses[service] = {
+      installed: matches.length > 0,
+      running: matches.some((item) => item.running),
+      ambiguous: matches.length > 1,
+      containers: matches
+    };
+  }
+
+  return {
+    dockerAvailable: docker.available,
+    error: docker.error ?? null,
+    services: statuses
+  };
+};
+
+const listDockerContainers = async () => {
+  try {
+    const stdout = await execFileAsync("docker", [
+      "ps",
+      "-a",
+      "--format",
+      "{{.ID}}\t{{.Image}}\t{{.Names}}\t{{.Status}}"
+    ]);
+
+    const containers = stdout
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => {
+        const [id, image, name, status = ""] = line.split("\t");
+        const running = status.startsWith("Up");
+        return { id, image: stripImageTag(image), name, status, running };
+      });
+
+    return { available: true, containers, error: null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "docker unavailable";
+    return { available: false, containers: [], error: message };
+  }
+};
+
+const execFileAsync = (command: string, args: string[]) => {
+  return new Promise<string>((resolve, reject) => {
+    execFile(command, args, { encoding: "utf8" }, (error, stdout) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+      resolve(stdout);
+    });
+  });
+};
+
+const normalizeToken = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const stripImageTag = (image: string) => {
+  const lastSlash = image.lastIndexOf("/");
+  const lastColon = image.lastIndexOf(":");
+  if (lastColon > lastSlash) return image.slice(0, lastColon);
+  return image;
 };
 
 const isSudoScript = (scriptPath: string) => {

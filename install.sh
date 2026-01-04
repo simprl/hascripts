@@ -8,15 +8,15 @@ fi
 
 REPO="${REPO:-}"
 REF="${REF:-main}"
-INSTALL_DIR="${INSTALL_DIR:-/opt/hascripts}"
-SERVICE_NAME="${SERVICE_NAME:-hascripts}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/lazystrap}"
+SERVICE_NAME="${SERVICE_NAME:-lazystrap}"
 
 if [[ -z "$REPO" ]]; then
   echo "Set REPO (e.g. REPO=owner/repo) to install."
   exit 1
 fi
 
-echo "Installing hascripts from ${REPO}@${REF} into ${INSTALL_DIR}"
+echo "Installing lazystrap from ${REPO}@${REF} into ${INSTALL_DIR}"
 
 apt-get update
 apt-get install -y ca-certificates curl gnupg tar
@@ -33,10 +33,10 @@ fi
 tmpdir="$(mktemp -d)"
 trap 'rm -rf "$tmpdir"' EXIT
 
-curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${REF}.tar.gz" -o "${tmpdir}/hascripts.tgz"
+curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${REF}.tar.gz" -o "${tmpdir}/lazystrap.tgz"
 rm -rf "${INSTALL_DIR}"
 mkdir -p "${INSTALL_DIR}"
-tar -xzf "${tmpdir}/hascripts.tgz" -C "${INSTALL_DIR}" --strip-components=1
+tar -xzf "${tmpdir}/lazystrap.tgz" -C "${INSTALL_DIR}" --strip-components=1
 
 cd "${INSTALL_DIR}"
 if [[ -f package-lock.json ]]; then
@@ -49,7 +49,7 @@ npm run build
 
 cat >/etc/systemd/system/${SERVICE_NAME}.service <<EOF
 [Unit]
-Description=hascripts service
+Description=lazystrap service
 After=network.target
 
 [Service]

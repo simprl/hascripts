@@ -1,4 +1,4 @@
-# hascripts
+# lazystrap
 
 Web UI to run local shell scripts and stream console output via SSE.
 
@@ -29,8 +29,8 @@ docker compose -f docker-compose.dev.yml up --build
 ## Dev (root backend for Docker scripts)
 Use this when you need Docker install/uninstall to run without sudo prompts.
 ```
-sudo -E npm run dev -w @hascripts/server
-npm run dev -w @hascripts/web
+sudo -E npm run dev -w @lazystrap/server
+npm run dev -w @lazystrap/web
 ```
 - App: http://localhost:8322
 
@@ -45,13 +45,13 @@ Click **Run group** in the UI to run multiple scripts sequentially.
 - If you run the server as a non-root user, configure sudo (see below) so the Docker scripts can run.
 
 ## Production install (Debian)
-This installs the service to `/opt/hascripts` and serves the built frontend from the backend.
+This installs the service to `/opt/lazystrap` and serves the built frontend from the backend.
 ```
 curl -fsSL https://raw.githubusercontent.com/<owner>/<repo>/main/install.sh | REPO=<owner>/<repo> bash
 ```
-- Service: `hascripts` (systemd)
+- Service: `lazystrap` (systemd)
 - App URL: http://localhost:8321
-- Logs: `journalctl -u hascripts -f`
+- Logs: `journalctl -u lazystrap -f`
 
 ## Production uninstall (Debian)
 ```
@@ -65,7 +65,7 @@ as root (production install), this is not needed.
 
 1) Create a sudoers file (replace `<repo>` with your repo path):
 ```
-sudo visudo -f /etc/sudoers.d/hascripts-docker
+sudo visudo -f /etc/sudoers.d/lazystrap-docker
 ```
 2) Add:
 ```
@@ -73,7 +73,7 @@ sudo visudo -f /etc/sudoers.d/hascripts-docker
 ```
 3) Ensure permissions:
 ```
-sudo chmod 440 /etc/sudoers.d/hascripts-docker
+sudo chmod 440 /etc/sudoers.d/lazystrap-docker
 ```
 
 ## Security note

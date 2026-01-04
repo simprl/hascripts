@@ -8,7 +8,7 @@ if [[ ${EUID:-$(id -u)} -ne 0 ]]; then
   exit 1
 fi
 
-CONTAINER_NAME="portainer"
+CONTAINER_NAME="${TARGET_CONTAINER:-portainer}"
 
 if ! command -v docker >/dev/null 2>&1; then
   echo "docker CLI not found. Is Docker installed?"

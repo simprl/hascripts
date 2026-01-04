@@ -6,8 +6,8 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 
-INSTALL_DIR="${INSTALL_DIR:-/opt/hascripts}"
-SERVICE_NAME="${SERVICE_NAME:-hascripts}"
+INSTALL_DIR="${INSTALL_DIR:-/opt/lazystrap}"
+SERVICE_NAME="${SERVICE_NAME:-lazystrap}"
 
 if systemctl list-unit-files | grep -q "^${SERVICE_NAME}.service"; then
   systemctl disable --now "${SERVICE_NAME}" || true

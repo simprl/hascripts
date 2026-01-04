@@ -20,7 +20,7 @@ if ! have_cmd docker; then
   exit 0
 fi
 
-CONTAINER_NAME="portainer"
+CONTAINER_NAME="${TARGET_CONTAINER:-portainer}"
 VOLUME_NAME="portainer_data"
 
 echo "[1/4] Stopping/removing container (if exists)..."

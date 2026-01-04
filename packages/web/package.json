@@ -1,5 +1,5 @@
 {
-  "name": "@hascripts/web",
+  "name": "@lazystrap/web",
   "version": "0.1.11",
   "private": true,
   "type": "module",
