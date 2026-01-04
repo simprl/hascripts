@@ -344,7 +344,7 @@ const runScriptPty = (
 
     const runId = crypto.randomUUID();
 
-    const env = {
+    const env: NodeJS.ProcessEnv = {
       ...process.env,
       TERM: "xterm-256color",
       LANG: process.env.LANG ?? "C.UTF-8",
